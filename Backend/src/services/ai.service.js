@@ -1,13 +1,19 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 require('dotenv').config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ 
-    model: "gemini-2.0-flash",
-    systemInstruction:
+const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_GEMINI_KEY;
 
-`
-Here’s a solid system instruction for your AI code reviewer:
+if (!apiKey) {
+    console.error("CRITICAL ERROR: GEMINI_API_KEY or GOOGLE_GEMINI_KEY is missing in environment variables!");
+} else {
+    console.log("Gemini API Key loaded successfully (Length: " + apiKey.length + ")");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
+const model = genAI.getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: `
+                Here’s a solid system instruction for your AI code reviewer:
 
                 AI System Instruction: Senior Code Reviewer (7+ Years of Experience)
 
@@ -42,13 +48,13 @@ Here’s a solid system instruction for your AI code reviewer:
                 Output Example:
 
                 ❌ Bad Code:
-                \\\`javascript
+                \`\`\`javascript
                                 function fetchData() {
                     let data = fetch('/api/data').then(response => response.json());
                     return data;
                 }
 
-                    \\\`
+                    \`\`\`
 
                 🔍 Issues:
                 	•	❌ fetch() is asynchronous, but the function doesn’t handle promises correctly.
@@ -56,18 +62,18 @@ Here’s a solid system instruction for your AI code reviewer:
 
                 ✅ Recommended Fix:
 
-                        \\\`javascript
+                        \`\`\`javascript
                 async function fetchData() {
                     try {
                         const response = await fetch('/api/data');
-                        if (!response.ok) throw new Error("HTTP error! Status: $\{response.status}");
+                        if (!response.ok) throw new Error("HTTP error! Status: \${response.status}");
                         return await response.json();
                     } catch (error) {
                         console.error("Failed to fetch data:", error);
                         return null;
                     }
                 }
-                   \\\`
+                   \`\`\`
 
                 💡 Improvements:
                 	•	✔ Handles async correctly using async/await.
@@ -78,13 +84,18 @@ Here’s a solid system instruction for your AI code reviewer:
 
                 Your mission is to ensure every piece of code follows high standards. Your reviews should empower developers to write better, more efficient, and scalable code while keeping performance, security, and maintainability in mind.
 
-                Would you like any adjustments based on your specific needs? 🚀 
-    `
+                Would you like any adjustments based on your specific needs? 🚀 
+    `
 });
 
 const generateContent = async (code) => {
-  const result = await model.generateContent(code);
-  return result.response.text();
+    try {
+        const result = await model.generateContent(code);
+        return result.response.text();
+    } catch (error) {
+        console.error("AI Service Error:", error);
+        throw error;
+    }
 }
 
 module.exports = generateContent;

@@ -1,23 +1,18 @@
 const express = require('express');
-const aiRoutes = require('./routes/ai.routes');
-const cors = require("cors");
+const aiRoutes = require('./routes/ai.routes')
+const cors = require('cors')
 
-const app = express();
-app.use(express.json()); // Middleware to parse JSON bodies
+const app = express()
 
-app.use(cors({
-  origin: [
-    'https://ai-code-reviewer-kl4u.onrender.com',
-    'https://ai-code-reviewer-4-7a6h.onrender.com'
-  ],
-  methods: ['POST', 'GET'],
-  credentials: true
-}));
+app.use(cors())
 
-app.get("/", (req, res) => {
-    res.send("Welcome to the AI API!");
-});
 
-app.use('/ai', aiRoutes);
+app.use(express.json())
 
-module.exports = app;
+app.get('/', (req, res) => {
+    res.send('Hello World')
+})
+
+app.use('/ai', aiRoutes)
+
+module.exports = app
