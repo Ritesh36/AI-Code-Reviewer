@@ -26,10 +26,8 @@ function App() {
     setLoading(true);
     setReview("");
     try {
-      const apiUrl =
-        import.meta.env.VITE_API_URL ||
-        "https://reviewbot-ai.onrender.com";
-      const response = await axios.post(`${apiUrl}/ai/review`, { code });
+      const baseUrl = (import.meta.env.VITE_API_URL || "http://localhost:5000").replace(/\/$/, "");
+      const response = await axios.post(`${baseUrl}/ai/review`, { code });
       setReview(response.data);
     } catch (error) {
       setReview("### ⚠️ Error\nFailed to generate review. Please try again.");
